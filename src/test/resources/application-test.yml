@@ -1,0 +1,5 @@
+logging:
+  level:
+    liquibase: INFO
+    org.testcontainers: DEBUG
+    org.springframework.jdbc.core: DEBUG

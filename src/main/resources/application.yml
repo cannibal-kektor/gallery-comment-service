@@ -1,0 +1,92 @@
+gallery:
+  security:
+    protected-services:
+      user-service-url: ${USER_SERVICE_URL:http://user-service:8080}
+      image-service-url: ${IMAGE_SERVICE_URL:http://image-service:8080}
+
+spring:
+  application:
+    name: Gallery-Comments-Service
+
+  datasource:
+    url: ${COMMENTS_DB_URL:jdbc:postgresql://postgres-comments:5432/comments_db}
+    username: ${COMMENTS_DB_USER:testUser}
+    password: ${COMMENTS_DB_PASSWORD:testPassword}
+    hikari:
+      connection-timeout: 200000
+      max-lifetime: 500000
+      maximum-pool-size: 10
+
+  liquibase:
+    enabled: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: 6379
+      database: 0
+      username: ${REDIS_USER:testRedisUser}
+      password: ${REDIS_PASSWORD:testRedisUserPassword}
+      client-type: lettuce
+      connect-timeout: 2s
+      timeout: 2s
+      repositories:
+        enabled: false
+      lettuce:
+        pool:
+          max-wait: 2s
+
+  cache:
+    type: none
+
+    redis:
+      time-to-live: 1h
+      cache-null-values: false
+    caffeine:
+      spec: initialCapacity=200,maximumSize=500,expireAfterWrite=30m
+
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+
+  web:
+    resources:
+      add-mappings: false
+
+---
+#Configuration for dev profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5435/comments_db
+  data:
+    redis:
+      host: localhost
+
+gallery:
+  security:
+    protected-services:
+      user-service-url: http://localhost:8081
+      image-service-url: http://localhost:8082
+
+server:
+  port: 8083
+
+---
+#Configuration for smoke test run
+spring:
+  config:
+    activate:
+      on-profile: smoke
+  liquibase:
+    enabled: false
+  sql:
+    init:
+      mode: never
+  data:
+    jdbc:
+      dialect: postgresql
+  datasource:
+    hikari:
+      allow-pool-suspension: true
