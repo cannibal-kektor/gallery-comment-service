@@ -1,3 +1,6 @@
+app:
+  version: @project.version@
+
 gallery:
   security:
     protected-services:
@@ -55,6 +58,28 @@ spring:
     resources:
       add-mappings: false
 
+springdoc:
+  api-docs:
+    enabled: false
+
+---
+#Configuration for openapi
+spring:
+  config:
+    activate:
+      on-profile: dev, smoke
+gallery:
+  security:
+    open-endpoints:
+      - /api/comments/v3/*
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api/comments/v3/api-docs
+  writer-with-default-pretty-printer: true
+  model-converters:
+    pageable-converter:
+      enabled: true
 ---
 #Configuration for dev profile
 spring:

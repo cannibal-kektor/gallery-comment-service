@@ -1,6 +1,7 @@
 package kektor.innowise.gallery.comment.controller;
 
 import jakarta.validation.Valid;
+import kektor.innowise.gallery.comment.controller.openapi.CommentServiceOpenApi;
 import kektor.innowise.gallery.comment.dto.CommentDto;
 import kektor.innowise.gallery.comment.dto.CreateCommentDto;
 import kektor.innowise.gallery.comment.service.CommentService;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/comments")
 @RequiredArgsConstructor
-public class CommentController {
+public class CommentController implements CommentServiceOpenApi {
 
     final CommentService commentService;
 
@@ -33,6 +34,7 @@ public class CommentController {
             path = "/{commentId}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @Override
     public ResponseEntity<CommentDto> get(@PathVariable Long commentId) {
         return ResponseEntity.ok()
                 .body(commentService.getById(commentId));
@@ -42,6 +44,7 @@ public class CommentController {
             value = "/image/{imageId}/post",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
+    @Override
     public ResponseEntity<CommentDto> postNewComment(@PathVariable Long imageId,
                                                      @Valid @RequestBody CreateCommentDto newComment) {
         return ResponseEntity.ok()
@@ -52,6 +55,7 @@ public class CommentController {
             value = "/{commentId}",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
+    @Override
     public ResponseEntity<CommentDto> update(@PathVariable Long commentId,
                                              @Valid @RequestBody CreateCommentDto newComment) {
         return ResponseEntity.ok()
@@ -59,6 +63,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
+    @Override
     public ResponseEntity<Void> delete(@PathVariable Long commentId) {
         commentService.deleteComment(commentId);
         return ResponseEntity.ok().build();
@@ -68,6 +73,7 @@ public class CommentController {
             path = "/image/{imageId}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @Override
     public ResponseEntity<Page<CommentDto>> getImageComments(@PathVariable Long imageId,
                                                              @PageableDefault(sort = "createdAt",
                                                                      direction = Sort.Direction.DESC)
@@ -77,6 +83,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/image/{imageId}")
+    @Override
     public ResponseEntity<Void> deleteImageComments(@PathVariable Long imageId) {
         commentService.deleteImageComments(imageId);
         return ResponseEntity.ok().build();
