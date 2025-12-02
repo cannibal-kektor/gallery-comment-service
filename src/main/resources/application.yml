@@ -3,6 +3,9 @@ gallery:
     protected-services:
       user-service-url: ${USER_SERVICE_URL:http://user-service:8080}
       image-service-url: ${IMAGE_SERVICE_URL:http://image-service:8080}
+    internal-endpoints:
+      - path: /api/comments/image/*
+        method.name: DELETE
 
 spring:
   application:
@@ -87,6 +90,10 @@ spring:
   data:
     jdbc:
       dialect: postgresql
+    redis:
+      lettuce:
+        pool:
+          enabled: false
   datasource:
     hikari:
       allow-pool-suspension: true

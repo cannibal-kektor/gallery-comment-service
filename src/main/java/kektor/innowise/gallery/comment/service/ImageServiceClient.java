@@ -8,7 +8,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 @HttpExchange(url = "/api/images")
 public interface ImageServiceClient {
 
-    @HttpExchange(url = "/{imageId}", method = "HEAD")
+    @HttpExchange(url = "/{imageId}/internal", method = "HEAD")
     ResponseEntity<Void> checkImageExists(@PathVariable Long imageId);
 
 }

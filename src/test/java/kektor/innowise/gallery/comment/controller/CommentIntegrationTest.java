@@ -124,7 +124,7 @@ public class CommentIntegrationTest {
     void createNewComment_When_ValidDataProvided() throws Exception {
         CreateCommentDto newComment = new CreateCommentDto("New test comment");
 
-        stubFor(head(urlPathEqualTo("/api/images/1"))
+        stubFor(head(urlPathEqualTo("/api/images/1/internal"))
                 .willReturn(aResponse().withStatus(200)));
         stubFor(WireMock.get(urlPathEqualTo("/api/users/id/1"))
                 .willReturn(aResponse()
@@ -150,7 +150,7 @@ public class CommentIntegrationTest {
     void returnNotFound_When_ImageDoesNotExist() throws Exception {
         CreateCommentDto newComment = new CreateCommentDto("New test comment");
 
-        stubFor(head(urlPathEqualTo("/api/images/100000"))
+        stubFor(head(urlPathEqualTo("/api/images/100000/internal"))
                 .willReturn(aResponse().withStatus(404)));
 
         mockMvc.perform(post("/api/comments/image/100000/post")
@@ -248,7 +248,7 @@ public class CommentIntegrationTest {
 
     @Test
     void returnPaginatedComments_When_ValidImageIdProvided() throws Exception {
-        stubFor(head(urlPathEqualTo("/api/images/1"))
+        stubFor(head(urlPathEqualTo("/api/images/1/internal"))
                 .willReturn(aResponse().withStatus(200)));
         stubFor(WireMock.get(urlPathEqualTo("/api/users/id/1"))
                 .willReturn(aResponse()
@@ -279,7 +279,7 @@ public class CommentIntegrationTest {
     @Test
     void returnEmptyPage_When_ImageHasNoComments() throws Exception {
 
-        stubFor(head(urlPathEqualTo("/api/images/100"))
+        stubFor(head(urlPathEqualTo("/api/images/100/internal"))
                 .willReturn(aResponse().withStatus(200)));
 
         mockMvc.perform(get("/api/comments/image/100?page=0&size=10")
@@ -291,11 +291,14 @@ public class CommentIntegrationTest {
 
     @Test
     void deleteAllImageComments_When_Requested() throws Exception {
+        HttpHeaders internalHeader = new HttpHeaders();
+        internalHeader.add("X-System-Internal-Call", "testServiceOrigin");
+
         mockMvc.perform(delete("/api/comments/image/1")
-                        .headers(headers))
+                        .headers(internalHeader))
                 .andExpect(status().isOk());
 
-        stubFor(head(urlPathEqualTo("/api/images/1"))
+        stubFor(head(urlPathEqualTo("/api/images/1/internal"))
                 .willReturn(aResponse().withStatus(200)));
 
         mockMvc.perform(get("/api/comments/image/1?page=0&size=10")
