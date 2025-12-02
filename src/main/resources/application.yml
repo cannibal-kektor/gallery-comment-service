@@ -71,7 +71,8 @@ spring:
 gallery:
   security:
     open-endpoints:
-      - /api/comments/v3/*
+      - path: /api/comments/v3/*
+        method.name: GET
 springdoc:
   api-docs:
     enabled: true
