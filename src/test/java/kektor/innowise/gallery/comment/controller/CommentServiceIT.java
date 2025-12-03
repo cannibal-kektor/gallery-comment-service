@@ -52,7 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "/sql/test-data.sql"
 }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @ActiveProfiles("test")
-public class CommentIntegrationTest {
+public class CommentServiceIT {
 
     @Container
     @ServiceConnection
