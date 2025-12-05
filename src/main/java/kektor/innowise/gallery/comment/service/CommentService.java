@@ -7,13 +7,11 @@ import kektor.innowise.gallery.comment.exception.ImageNotFoundException;
 import kektor.innowise.gallery.comment.mapper.CommentMapper;
 import kektor.innowise.gallery.comment.model.Comment;
 import kektor.innowise.gallery.comment.repository.CommentRepository;
-import kektor.innowise.gallery.security.UserPrincipal;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +24,7 @@ public class CommentService {
     ImageServiceClient imageService;
     CommentMapper mapper;
     UserServiceClient userService;
+    SecurityService securityService;
 
     @Transactional(readOnly = true)
     public CommentDto getById(Long commentId) {
@@ -50,9 +49,10 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Long commentId) {
-        repository.findByIdAuthorized(commentId, currentUserId());
+    public CommentDto deleteComment(Long commentId) {
+        Comment comment = repository.findByIdAuthorized(commentId, currentUserId());
         repository.deleteById(commentId);
+        return toDto(comment);
     }
 
     @Transactional(readOnly = true)
@@ -81,10 +81,7 @@ public class CommentService {
     }
 
     Long currentUserId() {
-        return ((UserPrincipal) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal())
-                .id();
+        return securityService.currentUserId();
     }
 }
 

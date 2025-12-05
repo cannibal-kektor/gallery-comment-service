@@ -9,8 +9,6 @@ import kektor.innowise.gallery.comment.exception.NonAuthorizedCommentAccessExcep
 import kektor.innowise.gallery.comment.mapper.CommentMapper;
 import kektor.innowise.gallery.comment.model.Comment;
 import kektor.innowise.gallery.comment.repository.CommentRepository;
-import kektor.innowise.gallery.security.HeaderAuthenticationToken;
-import kektor.innowise.gallery.security.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,9 +20,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
 
 import java.time.Instant;
 import java.util.List;
@@ -48,6 +43,8 @@ public class CommentServiceTest {
     ImageServiceClient imageService;
     @Mock
     UserServiceClient userServiceClient;
+    @Mock
+    SecurityService securityService;
     @Mock
     CommentMapper mapper;
 
@@ -80,15 +77,6 @@ public class CommentServiceTest {
         testUserDto = new UserDto(userId, testUsername, testEmail);
     }
 
-    @BeforeEach
-    void setUpSecurity() {
-        UserPrincipal userPrincipal = new UserPrincipal(userId, testUsername, testEmail);
-        HeaderAuthenticationToken authenticationToken = new HeaderAuthenticationToken(userPrincipal);
-        SecurityContext securityContext = new SecurityContextImpl();
-        securityContext.setAuthentication(authenticationToken);
-        SecurityContextHolder.setContext(securityContext);
-    }
-
     @Test
     void returnCommentDto_When_CommentExists() {
         when(repository.findByIdExceptionally(commentId)).thenReturn(testComment);
@@ -116,6 +104,7 @@ public class CommentServiceTest {
 
     @Test
     void postAndReturnCommentDto_When_ValidDataProvided() {
+        when(securityService.currentUserId()).thenReturn(userId);
         when(imageService.checkImageExists(imageId)).thenReturn(ResponseEntity.ok().build());
         when(mapper.toModel(testNewCommentDto, imageId, userId)).thenReturn(testComment);
         when(repository.save(testComment)).thenReturn(testComment);
@@ -146,6 +135,7 @@ public class CommentServiceTest {
 
     @Test
     void updateComment_When_UserIsOwner() {
+        when(securityService.currentUserId()).thenReturn(userId);
         when(repository.findByIdAuthorized(commentId, userId)).thenReturn(testComment);
         when(repository.save(testComment)).thenReturn(testComment);
         when(userServiceClient.fetchUser(userId)).thenReturn(Optional.of(testUserDto));
@@ -162,6 +152,7 @@ public class CommentServiceTest {
 
     @Test
     void throwNonAuthorizedCommentAccessException_When_UserIsNotOwner() {
+        when(securityService.currentUserId()).thenReturn(userId);
         when(repository.findByIdAuthorized(commentId, userId))
                 .thenThrow(new NonAuthorizedCommentAccessException(userId, commentId));
 
@@ -174,6 +165,7 @@ public class CommentServiceTest {
 
     @Test
     void deleteComment_When_UserIsOwner() {
+        when(securityService.currentUserId()).thenReturn(userId);
         when(repository.findByIdAuthorized(commentId, userId)).thenReturn(testComment);
 
         commentService.deleteComment(commentId);
@@ -211,12 +203,14 @@ public class CommentServiceTest {
 
     @Test
     void returnCurrentUserId_When_AuthenticationIsSet() {
+        when(securityService.currentUserId()).thenReturn(userId);
         Long result = commentService.currentUserId();
         assertEquals(userId, result);
     }
 
     @Test
     void throwNonAuthorizedCommentAccessException_When_DeletingCommentUserIsNotOwner() {
+        when(securityService.currentUserId()).thenReturn(userId);
         when(repository.findByIdAuthorized(commentId, userId))
                 .thenThrow(new NonAuthorizedCommentAccessException(userId, commentId));
 
