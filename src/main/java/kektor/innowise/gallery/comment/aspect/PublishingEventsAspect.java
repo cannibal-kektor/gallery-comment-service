@@ -2,6 +2,7 @@ package kektor.innowise.gallery.comment.aspect;
 
 
 import kektor.innowise.gallery.comment.dto.CommentDto;
+import kektor.innowise.gallery.comment.mapper.CommentMapper;
 import kektor.innowise.gallery.comment.msg.CommentEventMessage;
 import kektor.innowise.gallery.comment.service.SecurityService;
 import kektor.innowise.gallery.security.UserPrincipal;
@@ -15,8 +16,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-
 import static org.springframework.core.Ordered.LOWEST_PRECEDENCE;
 
 @Aspect
@@ -28,6 +27,7 @@ public class PublishingEventsAspect {
 
     ApplicationEventPublisher eventPublisher;
     SecurityService securityService;
+    CommentMapper mapper;
 
     @Pointcut("within(kektor.innowise.gallery.comment.service.*)")
     public void inService() {
@@ -44,15 +44,7 @@ public class PublishingEventsAspect {
     )
     public void commentEventAdvice(CommentDto comment, PublishCommentEvent event) {
         UserPrincipal user = securityService.currentUser();
-        var eventMessage = CommentEventMessage.builder()
-                .eventType(event.value())
-                .commentId(comment.id())
-                .imageId(comment.imageId())
-                .userId(user.id())
-                .username(user.username())
-                .comment(comment.content())
-                .instant(Instant.now())
-                .build();
+        CommentEventMessage eventMessage = mapper.toEvent(comment, user, event.value());
         eventPublisher.publishEvent(eventMessage);
     }
 
