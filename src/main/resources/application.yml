@@ -55,7 +55,7 @@ spring:
 
   kafka:
     bootstrap-servers:
-      - ${BOOTSTRAP_SERVERS:localhost:9092}
+      - ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       client-id: ${HOSTNAME}-producer
       acks: all
