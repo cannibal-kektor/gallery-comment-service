@@ -1,0 +1,431 @@
+openapi: 3.1.0
+info:
+  title: Comment Service API - Image Gallery Microservices
+  description: |
+    Comment Management Microservice for the Image Gallery application.
+    This service handles comment creation, retrieval, updating, and deletion for images.
+  contact:
+    name: cannibal-kektor
+    url: https://github.com/cannibal-kektor
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 1.0-SNAPSHOT
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+security:
+- bearer-token: []
+- internal-service: []
+tags:
+- name: Comment Management API
+  description: 'API for managing comments on images in the Image Gallery system. '
+paths:
+  /api/comments/{commentId}:
+    get:
+      tags:
+      - Comment Management API
+      summary: Get comment by ID
+      description: Retrieves a specific comment by its unique id
+      operationId: get
+      parameters:
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Actual comment dto
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDto"
+        "400":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "401":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "403":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "404":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "429":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "500":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "503":
+          $ref: "#/components/responses/ProblemDetailResponse"
+      security:
+      - bearer-token: []
+    put:
+      tags:
+      - Comment Management API
+      summary: Update existing comment
+      description: Updates the content of an existing comment.
+      operationId: update
+      parameters:
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Updated comment content
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentDto"
+        required: true
+      responses:
+        "200":
+          description: Actual comment dto
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDto"
+        "400":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "401":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "403":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "404":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "429":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "500":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "503":
+          $ref: "#/components/responses/ProblemDetailResponse"
+      security:
+      - bearer-token: []
+    delete:
+      tags:
+      - Comment Management API
+      summary: Delete comment
+      description: Deletes a specific comment
+      operationId: delete
+      parameters:
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Comment deleted successfully
+        "400":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "401":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "403":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "404":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "429":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "500":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "503":
+          $ref: "#/components/responses/ProblemDetailResponse"
+      security:
+      - bearer-token: []
+  /api/comments/image/{imageId}/post:
+    post:
+      tags:
+      - Comment Management API
+      summary: Create new comment on image
+      description: Creates a new comment on the specified image.
+      operationId: postNewComment
+      parameters:
+      - name: imageId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Comment content to create
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentDto"
+        required: true
+      responses:
+        "200":
+          description: Actual comment dto
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDto"
+        "400":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "401":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "403":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "404":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "429":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "500":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "503":
+          $ref: "#/components/responses/ProblemDetailResponse"
+      security:
+      - bearer-token: []
+  /api/comments/image/{imageId}:
+    get:
+      tags:
+      - Comment Management API
+      summary: Get image comments
+      description: Retrieves paginated comments of the specific image.
+      operationId: getImageComments
+      parameters:
+      - name: imageId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 10
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "createdAt,DESC"
+          items:
+            type: string
+      responses:
+        "200":
+          description: Comments retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageCommentDto"
+        "400":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "401":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "403":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "404":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "429":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "500":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "503":
+          $ref: "#/components/responses/ProblemDetailResponse"
+      security:
+      - bearer-token: []
+    delete:
+      tags:
+      - Comment Management API
+      summary: Delete all comments for image
+      description: Deletes all comments associated with a specific image
+      operationId: deleteImageComments
+      parameters:
+      - name: imageId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: All image comments deleted successfully
+        "400":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "401":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "403":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "404":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "429":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "500":
+          $ref: "#/components/responses/ProblemDetailResponse"
+        "503":
+          $ref: "#/components/responses/ProblemDetailResponse"
+      security:
+      - internal-service: []
+components:
+  schemas:
+    CreateCommentDto:
+      type: object
+      description: Request model for creating a new comment
+      properties:
+        content:
+          type: string
+          description: Comment text content
+          example: Test comment content
+          maxLength: 500
+          minLength: 0
+      required:
+      - content
+    CommentDto:
+      type: object
+      description: Comment data model containing comment information
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique comment id
+          example: 12345
+          readOnly: true
+        userId:
+          type: integer
+          format: int64
+          description: User identifier who created the comment
+          example: 67890
+          readOnly: true
+        username:
+          type: string
+          description: Username of the comment author
+          example: alex_white
+          readOnly: true
+        imageId:
+          type: integer
+          format: int64
+          description: Image id the comment belongs to
+          example: 54321
+          readOnly: true
+        content:
+          type: string
+          description: Comment content text
+          example: Test comment content
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Comment creation timestamp
+          example: 2025-11-01T10:30:00Z
+          readOnly: true
+    PageCommentDto:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommentDto"
+        number:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        paged:
+          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        unpaged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+    ProblemDetail:
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        properties:
+          type: object
+          additionalProperties:
+            type: object
+  responses:
+    ProblemDetailResponse:
+      description: RFC 7807 Error response
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+  securitySchemes:
+    bearer-token:
+      type: http
+      description: |
+        JWT authentication token obtained from the Authentication Service.
+        The API Gateway validates the token and forwards user information in headers:
+        - X-User-Id: User identifier
+        - X-User-Email: User email address
+        - X-User-Username: User username
+      scheme: bearer
+      bearerFormat: JWT
+    internal-service:
+      type: apiKey
+      description: |
+        Internal service authentication for inter-service communication.
+        Requires the X-System-Internal-Call header with the origin service name.
+        Used for service-to-service calls within the microservices ecosystem.
+      name: X-System-Internal-Call
+      in: header
