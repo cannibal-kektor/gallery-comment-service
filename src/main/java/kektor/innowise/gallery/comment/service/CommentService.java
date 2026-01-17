@@ -1,5 +1,6 @@
 package kektor.innowise.gallery.comment.service;
 
+import kektor.innowise.gallery.comment.aspect.PublishCommentEvent;
 import kektor.innowise.gallery.comment.dto.CommentDto;
 import kektor.innowise.gallery.comment.dto.CreateCommentDto;
 import kektor.innowise.gallery.comment.dto.UserDto;
@@ -14,6 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static kektor.innowise.gallery.comment.msg.CommentEventMessage.EventType.ADD_COMMENT;
+import static kektor.innowise.gallery.comment.msg.CommentEventMessage.EventType.REMOVE_COMMENT;
+import static kektor.innowise.gallery.comment.msg.CommentEventMessage.EventType.UPDATE_COMMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +37,7 @@ public class CommentService {
         return toDto(comment);
     }
 
+    @PublishCommentEvent(ADD_COMMENT)
     @Transactional
     public CommentDto postNewComment(Long imageId, CreateCommentDto newCommentDto) {
         checkImageExists(imageId);
@@ -40,6 +46,7 @@ public class CommentService {
         return toDto(comment);
     }
 
+    @PublishCommentEvent(UPDATE_COMMENT)
     @Transactional
     public CommentDto updateComment(Long commentId, CreateCommentDto newComment) {
         Comment comment = repository.findByIdAuthorized(commentId, currentUserId());
@@ -48,6 +55,7 @@ public class CommentService {
         return toDto(comment);
     }
 
+    @PublishCommentEvent(REMOVE_COMMENT)
     @Transactional
     public CommentDto deleteComment(Long commentId) {
         Comment comment = repository.findByIdAuthorized(commentId, currentUserId());

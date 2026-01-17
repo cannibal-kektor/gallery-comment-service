@@ -1,3 +1,8 @@
+app:
+  version: @project.version@
+  broker:
+    comment-event-topic: comment-events
+
 gallery:
   security:
     protected-services:
@@ -48,6 +53,39 @@ spring:
     caffeine:
       spec: initialCapacity=200,maximumSize=500,expireAfterWrite=30m
 
+  kafka:
+    bootstrap-servers:
+      - ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      client-id: ${HOSTNAME}-producer
+      acks: all
+      batch-size: 16384
+      buffer-memory: 16MB
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 2147483647
+      properties:
+        spring.json.type.mapping: commentEvent:kektor.innowise.gallery.comment.msg.CommentEventMessage
+        partitioner.ignore.keys: false
+        enable.idempotence: true
+        delivery.timeout.ms: 60000
+        request.timeout.ms: 10000
+        max.block.ms: 5000
+        linger.ms: 5
+
+  task:
+    execution:
+      threadNamePrefix: Async-Thread-
+      pool:
+        core-size: 4
+        max-size: 10
+        allow-core-thread-timeout: true
+        keep-alive: PT30S
+        queue-capacity: 200
+      shutdown:
+        await-termination: true
+        await-termination-period: PT30S
+
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
@@ -55,6 +93,51 @@ spring:
     resources:
       add-mappings: false
 
+springdoc:
+  api-docs:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+      discovery:
+        enabled: false
+    access:
+      default: none
+    jmx:
+      exposure:
+        exclude: "*"
+  endpoint:
+    health:
+      access: read_only
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState, diskSpace, db
+---
+#Configuration for openapi
+spring:
+  config:
+    activate:
+      on-profile: dev, smoke
+gallery:
+  security:
+    open-endpoints:
+      - path: /api/comments/v3/*
+        method.name: GET
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api/comments/v3/api-docs
+  writer-with-default-pretty-printer: true
+  model-converters:
+    pageable-converter:
+      enabled: true
 ---
 #Configuration for dev profile
 spring:
